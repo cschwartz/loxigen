@@ -3,7 +3,7 @@ type ${ofclass.pyname} struct {
 ::   if not (m.__class__.__name__  in ['OFPadMember'] or  m.name in ['version', 'type', 'length', 'xid']):
 ::     if not m.oftype.startswith('list'):
 ::       if m.base_length != 0 :
-  ${m.name} ${types[m.oftype]}
+  ${m.name} ${type_for_field(ofclass, m)}
 ::       else:
   ${m.name} []byte
 ::       #endif
@@ -33,7 +33,7 @@ func (m ${ofclass.pyname}) fillOutEvent(event *common.MapStr) {
 ::   if not (m.__class__.__name__  in ['OFPadMember'] or  m.name in ['version', 'type', 'length', 'xid']):
 ::     if not m.oftype.startswith('list'):
 ::       if m.base_length != 0:
-::          if m.__class__.__name__  == 'OFEnum':
+::          if type_for_field(ofclass, m) in enums and len(enums[type_for_field(ofclass, m)].values) > 0:
   (*event)["${m.name}"] = m.${m.name}.String()
 ::          else:
   (*event)["${m.name}"] = m.${m.name}

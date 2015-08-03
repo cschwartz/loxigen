@@ -96,7 +96,6 @@ def codegen(install_dir):
     #        version=version, modules=modules.keys())
     #
     # render(os.path.join(subdir, 'util.py'), version=version)
-
     types = {
       'uint8_t': 'uint8',
       'uint16_t': 'uint16',
@@ -133,9 +132,28 @@ def codegen(install_dir):
       'of_port_desc_t': 'of_port_desc' #we need to care specifically about parsing this
     }
 
+    field_to_enum = {
+        ('of_port_status', 'reason'): 'ofp_port_reason',
+        ('of_packet_in', 'reason'): 'ofp_packet_in_reason',
+        ('of_flow_mod', 'command'): 'ofp_flow_mod_command',
+        ('of_flow_removed', 'reason'): 'ofp_flow_removed_reason',
+        ('of_stats_reply', 'stats_type'): 'ofp_stats_type',
+        ('of_stats_request', 'stats_type'): 'ofp_stats_type'
+    }
+
+    def type_for_field(kls, member):
+        print kls.name
+        if (kls.name, member.name) in field_to_enum:
+            return field_to_enum[(kls.name, member.name)]
+        else:
+            return types[member.oftype]
+
+
     render(os.path.join(subdir, 'const.go'), version=version,
            enums=loxi_globals.ir[version].enums,types =types)
 
+    enum_dict = {enum.name: enum for enum in loxi_globals.ir[version].enums}
+
     for name, ofclasses in modules.items():
         render(os.path.join(subdir, name + '.go'), template_name='module.go',
-               version=version, ofclasses=ofclasses, subdir=subdir,types =types)
+               version=version, ofclasses=ofclasses, enums=enum_dict, type_for_field=type_for_field,subdir=subdir,types =types)
